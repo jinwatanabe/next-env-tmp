@@ -1,0 +1,44 @@
+name: Deploy to Vercel
+
+# mainブランチにpushをトリガーにする
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# ジョブを定義
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v3 # リポジトリのコードをクローンする
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3 # node.jsをセットアップする
+        with:
+          node-version: "20" # nodeのバージョン20を指定
+
+      # .envファイルを生成する(Next.jsではこの工程が必要)
+      - name: Create .env file
+        run: |
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
+
+        # .envをアーティファクトとして保存
+      - name: Upload .env as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-secrets
+          path: .env
+
+      - name: Install dependencies
+        run: npm install # 依存関係をインストール
+
+      - name: Build Next.js project
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: npm run build # ビルドする
