@@ -38,7 +38,4 @@ jobs:
         run: npm install # 依存関係をインストール
 
       - name: Build Next.js project
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: npm run build # ビルドする

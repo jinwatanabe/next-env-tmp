@@ -18,19 +18,34 @@ export default async function handler(
   res: NextApiResponse
 ) {
 
-  const {data, error } = await supabase.from('study-record').select('*')
+  if (req.method === 'POST') {
+    const { title, time } = req.body
 
-  if (error) {
-    return res.status(500).json({ message: error.message })
-  }
+    const { error } = await supabase.from('study-record').insert([
+      { title, time }
+    ])
 
-  const studyRecords: StudyRecord[] = data.map((record: StudyRecordData) => {
-    return {
-      title: record.title,
-      time: record.time
+    if (error) {
+      return res.status(500).json({ message: error.message })
     }
-  })
 
-  res.status(200).json({ studyRecords })
+    return res.status(200).json({ message: 'success' })
+  } else if (req.method === 'GET') {
+
+    const {data, error } = await supabase.from('study-record').select('*')
+
+    if (error) {
+      return res.status(500).json({ message: error.message })
+    }
+
+    const studyRecords: StudyRecord[] = data.map((record: StudyRecordData) => {
+      return {
+        title: record.title,
+        time: record.time
+      }
+    })
+
+    res.status(200).json({ studyRecords })
+  }
 
 }
